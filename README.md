@@ -4,6 +4,9 @@ Turning object into json can sometimes be frustrating. With Jsoning, you could t
 everyday ruby object into JSON, very easily. It should work with
 any Ruby object there is. Kiss good bye to complexity
 
+[![Code Climate](https://codeclimate.com/github/saveav/jsoning/badges/gpa.svg)](https://codeclimate.com/github/saveav/jsoning)
+[ ![Codeship Status for saveav/bali](https://codeship.com/projects/b58d3950-493b-0133-a217-168d58eb1296/status?branch=release)](https://codeship.com/projects/105558)
+
 ## Installation
 
 Add this line to your application's Gemfile:
