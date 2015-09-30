@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Adam Pahlevi"]
   spec.email         = ["adam.pahlevi@gmail.com"]
 
-  spec.sunmary       = %q{Turns any of your everyday ruby objects to json formats, the way you always want it}
+  spec.summary       = %q{Turns any of your everyday ruby objects to json formats, the way you always want it}
   spec.description   = %q{Turning object into json can sometimes be frustrating. With Jsoning, you could turn your
                             everyday ruby object into JSON, very easily. It should work with
                             any Ruby object there is. Kiss good bye to complexity!}
@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rspec", "~> 3.3"
 end
