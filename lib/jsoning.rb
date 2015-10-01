@@ -41,6 +41,11 @@ module Jsoning
     protocol.generate(object, options)
   end
 
+  def self.[](object) 
+    protocol = protocol_for!(object.class)
+    protocol.parse(object)
+  end
+
   # monkey patch Kernel
   module ::Kernel
     private
