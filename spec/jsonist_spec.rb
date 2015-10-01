@@ -24,6 +24,9 @@ class My::UserDegree
     "#{degree_name} at #{faculty}"
   end
 end
+class My::Achievement
+  attr_accessor :achievement_name
+end
 
 describe Jsoning do
   before(:each) do
@@ -81,7 +84,14 @@ describe Jsoning do
       user
     end
 
-    it "can generate json" do
+    let(:degree) do
+      degree = My::UserDegree.new
+      degree.faculty = "School of IT"
+      degree.degree_name = "B.Sc. (Hons) Computer Science"
+      degree
+    end
+    
+    before do
       Jsoning.for(My::User) do
         key :name
         key :years_old, from: :age
@@ -98,17 +108,40 @@ describe Jsoning do
         key :faculty
         key :degree, from: :degree_name
       end
+    end
 
+    it "throws an error when generating JSON for unknown class" do
+      expect do
+        achievement = My::Achievement.new
+        Jsoning(achievement)
+      end.to raise_error(Jsoning::Error)
+    end
+
+    it "throws an error when parsing for unknown class" do
+      expect do
+        achievement = My::Achievement.new
+        Jsoning[achievement]
+      end.to raise_error(Jsoning::Error)
+    end
+
+    it "can generate json" do
       json = Jsoning(user)
       expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil})
 
-      degree = My::UserDegree.new
-      degree.faculty = "School of IT"
-      degree.degree_name = "B.Sc. (Hons) Computer Science"
       user.taken_degree = degree
 
       json = Jsoning(user)
       expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}})
+    end
+
+    it "can generate hash" do
+      hash = Jsoning[user]
+      expect(hash).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil})
+
+      user.taken_degree = degree
+
+      hash = Jsoning[user]
+      expect(hash).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}})
     end
   end
 end

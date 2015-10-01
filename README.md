@@ -23,6 +23,11 @@ Or install it yourself as:
 
     $ gem install jsoning
 
+## What it can do?
+
+1. Generating JSON from your object
+2. Generating Hash from your object
+
 ## Assumptions
 
 We have classes already defined as follow:
@@ -164,7 +169,33 @@ Jsoning the user with pretty set to true, will return:
 }
 ```
 
-Wish it to be helpful for you! Enjoy!
+## Returning Hash
+
+It is also possible to return hash as well:
+
+```ruby
+Jsoning[user]
+```
+
+The syntax above will return ruby hash object:
+
+```ruby
+{"name"=>"Adam Baihaqi", 
+ "years_old"=>21, 
+ "gender"=>"male", 
+ "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], 
+ "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}}
+```
+
+## Changelog
+
+== Version 0.1.0
+
+1. Ability to turn object into JSON
+
+== Version 0.2.0
+
+2. Ability to turn object into a hash
 
 ## License
 
