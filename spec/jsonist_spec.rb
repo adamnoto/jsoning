@@ -1,13 +1,16 @@
 require 'spec_helper'
+require "date"
 
 module My; end
 class My::User
   attr_accessor :name, :age, :gender
   attr_accessor :taken_degree
   attr_accessor :books
+  attr_accessor :created_at
 
   def initialize
     self.books = []
+    self.created_at = DateTime.parse("2015-11-01T14:41:09Z")
   end
 end
 class My::Book
@@ -98,6 +101,7 @@ describe Jsoning do
         key :gender, default: "male"
         key :books, default: proc { [] }
         key :degree_detail, from: :taken_degree
+        key :registered_at, from: :created_at
       end
 
       Jsoning.for(My::Book) do
@@ -131,12 +135,12 @@ describe Jsoning do
 
     it "can generate json" do
       json = Jsoning(user)
-      expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil})
+      expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"})
 
       user.taken_degree = degree
 
       json = Jsoning(user)
-      expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}})
+      expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}, "registered_at"=>"2015-11-01T14:41:09+00:00"})
     end
 
     context "when default value is a proc" do
@@ -168,12 +172,12 @@ describe Jsoning do
 
     it "can generate hash" do
       hash = Jsoning[user]
-      expect(hash).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil})
+      expect(hash).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"})
 
       user.taken_degree = degree
 
       hash = Jsoning[user]
-      expect(hash).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}})
+      expect(hash).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}, "registered_at"=>"2015-11-01T14:41:09+00:00"})
     end
   end
 end
