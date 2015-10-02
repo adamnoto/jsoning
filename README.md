@@ -12,7 +12,7 @@ any Ruby object there is. Kiss good bye to complexity
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'Jsoning'
+gem 'jsoning'
 ```
 
 And then execute:
@@ -187,6 +187,18 @@ The syntax above will return ruby hash object:
  "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}}
 ```
 
+## Supporting custom data type
+
+JSON, by default support data type such as boolean, nil, string, and number. If you have class like
+`MyFancyString` and would tell Jsoning how to interpret and extract value from them, use this syntax:
+
+```ruby
+Jsoning.add_type MyFancyString, processor: { |fancy_string| fancy_string.get_string } 
+```
+
+Internally, it is how Jsoning convert date-like data type (`Date`, `DateTime`, `Time`, `ActiveSupport::TimeWithZone`) to
+ISO8601 which can be parsed by compliant JavaScript interpreter in the browser (or somewhere else).
+
 ## Changelog
 
 == Version 0.1.0
@@ -195,7 +207,12 @@ The syntax above will return ruby hash object:
 
 == Version 0.2.0
 
-2. Ability to turn object into a hash
+1. Ability to turn object into a hash
+
+== Version 0.3.0
+
+1. Allow user to specify how Jsoning would extract value from a custom data type
+2. Date, DateTime, Time, ActiveSupport::TimeWithZone now is by default parsed to ISO8601 format.
 
 ## License
 
