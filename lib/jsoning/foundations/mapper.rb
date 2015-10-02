@@ -50,23 +50,29 @@ class Jsoning::Mapper
     def deep_parse(object)
       parsed_data = nil
 
-      if object.is_a?(Array)
-        parsed_data = []
-        object.each do |each_obj|
-          parsed_data << deep_parse(each_obj)
-        end
-      elsif object.is_a?(Hash)
-        parsed_data = {}
-        object.each do |obj_key_name, obj_val|
-          parsed_data[obj_key_name] = deep_parse(obj_val)
-        end
-      elsif object.is_a?(Integer) || object.is_a?(Float) || object.is_a?(String) ||
-        object.is_a?(TrueClass) || object.is_a?(FalseClass) || object.is_a?(NilClass)
-        parsed_data = object
+      value_extractor = Jsoning::TYPE_EXTENSIONS[object.class.to_s]
+      if value_extractor # is defined
+        parsed_data = value_extractor.(object)
       else
-        protocol = Jsoning.protocol_for!(object.class)
-        parsed_data = protocol.parse(object)
+        if object.is_a?(Array)
+          parsed_data = []
+          object.each do |each_obj|
+            parsed_data << deep_parse(each_obj)
+          end
+        elsif object.is_a?(Hash)
+          parsed_data = {}
+          object.each do |obj_key_name, obj_val|
+            parsed_data[obj_key_name] = deep_parse(obj_val)
+          end
+        elsif object.is_a?(Integer) || object.is_a?(Float) || object.is_a?(String) ||
+          object.is_a?(TrueClass) || object.is_a?(FalseClass) || object.is_a?(NilClass)
+          parsed_data = object
+        else
+          protocol = Jsoning.protocol_for!(object.class)
+          parsed_data = protocol.parse(object)
+        end
       end
+
 
       parsed_data
     end
