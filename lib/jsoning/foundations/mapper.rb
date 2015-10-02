@@ -31,18 +31,31 @@ class Jsoning::Mapper
 
   # map this very specific object's field to target_hash
   def extract(object, target_hash)
+    target_value = nil
+
     if object.respond_to?(parallel_variable)
       parallel_val = object.send(parallel_variable)
-      parallel_val = default_value if parallel_val.nil?
-      target_hash[name] = deep_parse(parallel_val)
-    else
-      if default_value
-        target_hash[name] = deep_parse(default_value)
-      else
-        unless nullable
-          raise Jsoning::Error, "Null value given for '#{name}' when serializing #{object}"
-        end
+      target_value = deep_parse(parallel_val)
+    end
+
+    if target_value.nil?
+      target_value = self.get_default_value
+      if target_value.nil? && !self.nullable
+        raise Jsoning::Error, "Null value given for '#{name}' when serializing #{object}"
       end
+    end
+    target_hash[name] = deep_parse(target_value)
+  end
+
+  def get_default_value
+    if self.default_value
+      if self.default_value.is_a?(Proc)
+        return deep_parse(self.default_value.())
+      else
+        return deep_parse(self.default_value)
+      end
+    else
+      nil
     end
   end
 
@@ -72,7 +85,6 @@ class Jsoning::Mapper
           parsed_data = protocol.parse(object)
         end
       end
-
 
       parsed_data
     end

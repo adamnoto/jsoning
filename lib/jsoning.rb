@@ -39,11 +39,53 @@ module Jsoning
   end
 
   def generate(object, options = {})
+    initialize_type_extensions 
     protocol = protocol_for!(object.class)
     protocol.generate(object, options)
   end
 
+  @@type_extension_initialized = false
+  def initialize_type_extensions
+    @@type_extension_initialized = true if !!@@type_extension_initialized
+    return if @@type_extension_initialized
+
+    begin
+      require "time"
+      ::Time
+      self.add_type Time, processor: proc { |time| time.iso8601 }
+    rescue
+    end
+
+    begin
+      # try to define value extractor for ActiveSupport::TimeWithZone which is in common use
+      # for AR model
+      ::ActiveSupport::TimeWithZone
+      self.add_type ActiveSupport::TimeWithZone, processor: proc { |time| time.send(:iso8601) }
+    rescue 
+      # nothing, don't add
+    end
+
+    begin
+      ::DateTime
+      self.add_type DateTime, processor: proc { |date| date.send(:iso8601) }
+    rescue => e 
+      # nothing, don't add
+    end
+
+    begin
+      ::Date
+      self.add_type Date, processor: proc { |date| date.send(:iso8601) }
+    rescue 
+      # nothing, don't add
+    end
+  end
+
   class << self
+    def [](object) 
+      protocol = protocol_for!(object.class)
+      protocol.parse(object)
+    end
+
     def add_type(klass, options = {})
       processor = options[:processor]
       raise Jsoning::Error, "Pass in processor that is a proc explaining how to extract the value" unless processor.is_a?(Proc)
@@ -51,11 +93,6 @@ module Jsoning
       TYPE_EXTENSIONS[klass.to_s] = processor
       nil
     end
-  end
-  
-  def self.[](object) 
-    protocol = protocol_for!(object.class)
-    protocol.parse(object)
   end
 
   # monkey patch Kernel
