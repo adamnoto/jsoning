@@ -147,7 +147,7 @@ describe Jsoning do
       it "can generate json" do
         user.books = nil
         json = Jsoning(user)
-        expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[], "degree_detail"=>nil})
+        expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"}) 
       end
 
       it "can generate json when default value is full-blown script" do
@@ -166,7 +166,7 @@ describe Jsoning do
 
         user.books = nil
         json = Jsoning(user)
-        expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], "degree_detail"=>nil})
+        expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"}) 
       end
     end
 
