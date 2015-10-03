@@ -86,7 +86,7 @@ module Jsoning
 
   def [](object) 
     protocol = protocol_for!(object.class)
-    protocol.parse(object)
+    protocol.retrieve_values_from(object)
   end
 
   def add_type(klass, options = {})
@@ -106,7 +106,8 @@ module Jsoning
   end
 
   # parse the JSON String to Hash
-  def parse(json_string)
-
+  def parse(json_string, klass)
+    protocol = protocol_for!(klass)
+    protocol.construct_hash_from(json_string)
   end
 end
