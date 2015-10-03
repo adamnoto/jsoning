@@ -81,6 +81,11 @@ module Jsoning
   end
 
   class << self
+    def [](object) 
+      protocol = protocol_for!(object.class)
+      protocol.parse(object)
+    end
+
     def add_type(klass, options = {})
       processor = options[:processor]
       raise Jsoning::Error, "Pass in processor that is a proc explaining how to extract the value" unless processor.is_a?(Proc)
@@ -88,11 +93,6 @@ module Jsoning
       TYPE_EXTENSIONS[klass.to_s] = processor
       nil
     end
-  end
-  
-  def self.[](object) 
-    protocol = protocol_for!(object.class)
-    protocol.parse(object)
   end
 
   # monkey patch Kernel

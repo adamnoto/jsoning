@@ -96,10 +96,10 @@ describe Jsoning do
     
     before do
       Jsoning.for(My::User) do
-        key :name
+        key :name, null: false
         key :years_old, from: :age
         key :gender, default: "male"
-        key :books
+        key :books, default: proc { [] }
         key :degree_detail, from: :taken_degree
         key :registered_at, from: :created_at
       end
@@ -121,6 +121,11 @@ describe Jsoning do
       end.to raise_error(Jsoning::Error)
     end
 
+    it "throws an error when null is given when field is not expected to receive null" do
+      user.name = nil
+      expect { Jsoning(user) }.to raise_error(Jsoning::Error)
+    end
+
     it "throws an error when parsing for unknown class" do
       expect do
         achievement = My::Achievement.new
@@ -136,6 +141,33 @@ describe Jsoning do
 
       json = Jsoning(user)
       expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}, "registered_at"=>"2015-11-01T14:41:09+00:00"})
+    end
+
+    context "when default value is a proc" do
+      it "can generate json" do
+        user.books = nil
+        json = Jsoning(user)
+        expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"}) 
+      end
+
+      it "can generate json when default value is full-blown script" do
+        Jsoning.for(My::User) do
+          key :name, null: false
+          key :years_old, from: :age
+          key :gender, default: "male"
+          key :books, default: proc {
+            default_college_books = []
+            default_college_books << My::Book.new("Mathematics 6A")
+            default_college_books << My::Book.new("Physics A2")
+            default_college_books
+          }
+          key :degree_detail, from: :taken_degree
+        end
+
+        user.books = nil
+        json = Jsoning(user)
+        expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"}) 
+      end
     end
 
     it "can generate hash" do
