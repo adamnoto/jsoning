@@ -43,12 +43,13 @@ module Jsoning
 
   # generate the json document
   def generate(object, options = {})
-    initialize_type_extensions 
     protocol = protocol_for!(object.class)
     protocol.generate(object, options)
   end
 
   @@type_extension_initialized = false
+  # define value extractor/interpreter for commonly used ruby datatypes that are not
+  # part of standard types supported by JSON
   def initialize_type_extensions
     @@type_extension_initialized = true if !!@@type_extension_initialized
     return if @@type_extension_initialized
@@ -85,6 +86,7 @@ module Jsoning
   end
 
   def [](object) 
+    Jsoning.initialize_type_extensions 
     protocol = protocol_for!(object.class)
     protocol.retrieve_values_from(object)
   end
@@ -101,12 +103,14 @@ module Jsoning
     private
 
     def Jsoning(object, options = {})
+      Jsoning.initialize_type_extensions 
       Jsoning.generate(object, options)
     end
   end
 
   # parse the JSON String to Hash
   def parse(json_string, klass)
+    Jsoning.initialize_type_extensions 
     protocol = protocol_for!(klass)
     protocol.construct_hash_from(json_string)
   end
