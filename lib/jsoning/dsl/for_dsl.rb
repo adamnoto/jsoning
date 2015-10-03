@@ -34,7 +34,7 @@ class Jsoning::ForDsl
     mapper.name = mapped_to
     mapper.default_value = options.delete(:default) || options.delete("default")
     mapper.nullable = options.delete(:null)
-    mapper.nullable = options.delete("null") if mapper.nullable.nil?
+    mapper.nullable = options.delete("null") if mapper.nullable?.nil?
 
     options.keys { |key| raise Jsoning::Error, "Undefined option: #{key}" }
 
