@@ -169,9 +169,7 @@ Jsoning the user with pretty set to true, will return:
 }
 ```
 
-## Returning Hash
-
-It is also possible to return hash as well:
+It is also possible to retrieve in form of Ruby hash rather than JSON string:
 
 ```ruby
 Jsoning[user]
