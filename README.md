@@ -214,6 +214,11 @@ ISO8601 which can be parsed by compliant JavaScript interpreter in the browser (
 1. Allow user to specify how Jsoning would extract value from a custom data type
 2. Date, DateTime, Time, ActiveSupport::TimeWithZone now is by default parsed to ISO8601 format.
 
+== Version 0.4.0
+
+1. When passing a proc as default value, it will be executed to assign default value when value is nil.
+2. Parsing JSON string as hash by using `Jsoning.parse`
+
 ## License
 
 The gem is proudly available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
