@@ -55,9 +55,8 @@ module Jsoning
     return if @@type_extension_initialized
 
     begin
-      require "time"
       ::Time
-      self.add_type Time, processor: proc { |time| time.iso8601 }
+      self.add_type Time, processor: proc { |time| time.strftime("%FT%T%z") }
     rescue
     end
 
@@ -65,21 +64,21 @@ module Jsoning
       # try to define value extractor for ActiveSupport::TimeWithZone which is in common use
       # for AR model
       ::ActiveSupport::TimeWithZone
-      self.add_type ActiveSupport::TimeWithZone, processor: proc { |time| time.send(:iso8601) }
+      self.add_type ActiveSupport::TimeWithZone, processor: proc { |time| time.strftime("%FT%T%z") }
     rescue 
       # nothing, don't add
     end
 
     begin
       ::DateTime
-      self.add_type DateTime, processor: proc { |date| date.send(:iso8601) }
+      self.add_type DateTime, processor: proc { |date| date.strftime("%FT%T%z") }
     rescue => e 
       # nothing, don't add
     end
 
     begin
       ::Date
-      self.add_type Date, processor: proc { |date| date.send(:iso8601) }
+      self.add_type Date, processor: proc { |date| date.strftime("%FT%T%z") }
     rescue 
       # nothing, don't add
     end
