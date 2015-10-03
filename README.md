@@ -199,8 +199,8 @@ ISO8601 which can be parsed by compliant JavaScript interpreter in the browser (
 
 ## Parsing JSON back to Hash
 
-Basically, the `JSON` library that is part of Ruby Standard Library already support parsing from JSON string to Hash.
-However, if you feel that you need to assign default value, for example, when value is missing, or when you want to 
+The `JSON` library that is part of Ruby Standard Library already support parsing from JSON string to Hash.
+However, if you feel that you need to assign default value, for example, when a value is missing, or when you want to 
 enforce the schema, Ruby's own `JSON` library cannot do that yet. Jsoning, on the other hand, can.
 
 The schema must have been defined by using `Jsoning.for` as have been demonstrated earlier.
@@ -228,7 +228,12 @@ Jsoning.for(My::User) do
 end
 
 the_json_string = %Q{
-  {"name":"Adam Baihaqi","years_old":21,"gender":"male","books":[{"name":"Mathematics 6A"},{"name":"Physics A2"}],"degree_detail":null,"registered_at":"2015-11-01T14:41:09+00:00"}
+  {"name":"Adam Baihaqi",
+   "years_old":21,
+   "gender":"male",
+   "books":[{"name":"Mathematics 6A"},{"name":"Physics A2"}],
+   "degree_detail":null,
+   "registered_at":"2015-11-01T14:41:09+00:00"}
 } 
 ```
 
