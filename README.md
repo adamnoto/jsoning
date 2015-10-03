@@ -268,6 +268,12 @@ Calling: `Jsoning.parse(the_json_string, My::User)` will yield a Hash as follow:
 1. When passing a proc as default value, it will be executed to assign default value when value is nil.
 2. Parsing JSON string as hash by using `Jsoning.parse`
 
+== Version 0.5.0
+
+1. Bugfix: when Jsoning to Hash, if encountering data-like datatype, error is 
+   raised due to Jsoning does not know how to extract value from them. However, if the object
+   is converted to JSON string, everything is working as expected.
+
 ## License
 
 The gem is proudly available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
