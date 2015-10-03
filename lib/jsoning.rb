@@ -50,6 +50,13 @@ module Jsoning
     return if @@type_extension_initialized
 
     begin
+      require "time"
+      ::Time
+      self.add_type Time, processor: proc { |time| time.iso8601 }
+    rescue
+    end
+
+    begin
       # try to define value extractor for ActiveSupport::TimeWithZone which is in common use
       # for AR model
       ::ActiveSupport::TimeWithZone
