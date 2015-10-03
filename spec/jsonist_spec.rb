@@ -34,6 +34,7 @@ end
 describe Jsoning do
   before(:each) do
     Jsoning.clear
+    Jsoning::TYPE_EXTENSIONS.clear
   end
 
   it 'has a version number' do
@@ -131,6 +132,14 @@ describe Jsoning do
         achievement = My::Achievement.new
         Jsoning[achievement]
       end.to raise_error(Jsoning::Error)
+    end
+
+    it "does not throw an error when interpreting DateTime" do
+      json_hash = Jsoning[user]
+      json_str = Jsoning(user)
+
+      expect(json_hash).to_not be_nil
+      expect(json_str).to_not be_nil
     end
 
     it "can generate json" do
