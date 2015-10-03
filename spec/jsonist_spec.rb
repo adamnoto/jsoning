@@ -73,7 +73,7 @@ describe Jsoning do
       protocol = Jsoning.protocol_for(My::User)
       name_mapper = protocol.mapper_for(:name)
       expect(name_mapper.name).to eq("name")
-      expect(name_mapper.nullable).to eq(false)
+      expect(name_mapper.nullable?).to eq(false)
     end
   end # dsl
 
@@ -140,7 +140,9 @@ describe Jsoning do
       user.taken_degree = degree
 
       json = Jsoning(user)
-      expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}, "registered_at"=>"2015-11-01T14:41:09+00:00"})
+      expected_hash = {"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>{"faculty"=>"School of IT", "degree"=>"B.Sc. (Hons) Computer Science"}, "registered_at"=>"2015-11-01T14:41:09+00:00"}
+      expect(JSON.parse(json)).to eq(expected_hash)
+      expect(Jsoning.parse(json, My::User)).to eq(expected_hash)
     end
 
     context "when default value is a proc" do
@@ -167,6 +169,7 @@ describe Jsoning do
         user.books = nil
         json = Jsoning(user)
         expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"}) 
+        expect(Jsoning.parse(json, My::User)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+00:00"})
       end
     end
 
