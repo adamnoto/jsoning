@@ -84,17 +84,16 @@ module Jsoning
     end
   end
 
-  def add_type(klass, options = {})
-    processor = options[:processor]
-    raise Jsoning::Error, "Pass in processor that is a proc explaining how to extract the value" unless processor.is_a?(Proc)
-
-    TYPE_EXTENSIONS[klass.to_s] = processor
-    nil
-  end
-  
   def [](object) 
     protocol = protocol_for!(object.class)
     protocol.parse(object)
+  end
+
+  def add_type(klass, options = {})
+    processor = options[:processor]
+    raise Jsoning::Error, "Pass in processor that is a proc explaining how to extract the value" unless processor.is_a?(Proc)
+    TYPE_EXTENSIONS[klass.to_s] = processor
+    nil
   end
 
   # monkey patch Kernel
