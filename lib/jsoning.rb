@@ -39,8 +39,38 @@ module Jsoning
   end
 
   def generate(object, options = {})
+    initialize_type_extensions 
     protocol = protocol_for!(object.class)
     protocol.generate(object, options)
+  end
+
+  @@type_extension_initialized = false
+  def initialize_type_extensions
+    @@type_extension_initialized = true if !!@@type_extension_initialized
+    return if @@type_extension_initialized
+
+    begin
+      # try to define value extractor for ActiveSupport::TimeWithZone which is in common use
+      # for AR model
+      ::ActiveSupport::TimeWithZone
+      self.add_type ActiveSupport::TimeWithZone, processor: proc { |time| time.send(:iso8601) }
+    rescue 
+      # nothing, don't add
+    end
+
+    begin
+      ::DateTime
+      self.add_type DateTime, processor: proc { |date| date.send(:iso8601) }
+    rescue => e 
+      # nothing, don't add
+    end
+
+    begin
+      ::Date
+      self.add_type Date, processor: proc { |date| date.send(:iso8601) }
+    rescue 
+      # nothing, don't add
+    end
   end
 
   class << self
