@@ -43,20 +43,20 @@ module Jsoning
 
   # generate the json document
   def generate(object, options = {})
-    initialize_type_extensions 
     protocol = protocol_for!(object.class)
     protocol.generate(object, options)
   end
 
   @@type_extension_initialized = false
+  # define value extractor/interpreter for commonly used ruby datatypes that are not
+  # part of standard types supported by JSON
   def initialize_type_extensions
     @@type_extension_initialized = true if !!@@type_extension_initialized
     return if @@type_extension_initialized
 
     begin
-      require "time"
       ::Time
-      self.add_type Time, processor: proc { |time| time.iso8601 }
+      self.add_type Time, processor: proc { |time| time.strftime("%FT%T%z") }
     rescue
     end
 
@@ -64,27 +64,28 @@ module Jsoning
       # try to define value extractor for ActiveSupport::TimeWithZone which is in common use
       # for AR model
       ::ActiveSupport::TimeWithZone
-      self.add_type ActiveSupport::TimeWithZone, processor: proc { |time| time.send(:iso8601) }
+      self.add_type ActiveSupport::TimeWithZone, processor: proc { |time| time.strftime("%FT%T%z") }
     rescue 
       # nothing, don't add
     end
 
     begin
       ::DateTime
-      self.add_type DateTime, processor: proc { |date| date.send(:iso8601) }
+      self.add_type DateTime, processor: proc { |date| date.strftime("%FT%T%z") }
     rescue => e 
       # nothing, don't add
     end
 
     begin
       ::Date
-      self.add_type Date, processor: proc { |date| date.send(:iso8601) }
+      self.add_type Date, processor: proc { |date| date.strftime("%FT%T%z") }
     rescue 
       # nothing, don't add
     end
   end
 
   def [](object) 
+    Jsoning.initialize_type_extensions 
     protocol = protocol_for!(object.class)
     protocol.retrieve_values_from(object)
   end
@@ -101,12 +102,14 @@ module Jsoning
     private
 
     def Jsoning(object, options = {})
+      Jsoning.initialize_type_extensions 
       Jsoning.generate(object, options)
     end
   end
 
   # parse the JSON String to Hash
   def parse(json_string, klass)
+    Jsoning.initialize_type_extensions 
     protocol = protocol_for!(klass)
     protocol.construct_hash_from(json_string)
   end
