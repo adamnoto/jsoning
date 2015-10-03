@@ -1,9 +1,9 @@
-# takes care of translating/fetching values from the object
+# responsible of mapping from object to representable values, one field at a time
 class Jsoning::Mapper
   # when mapped, what will be the mapped name
   attr_writer :name
 
-  attr_accessor :default_value
+  attr_writer :default_value
   attr_writer :nullable
   # what variable in the object will be used to obtain the value
   attr_accessor :parallel_variable
@@ -11,11 +11,11 @@ class Jsoning::Mapper
 
   def initialize
     self.parallel_variable = nil
-    self.default_value = nil
+    @default_value = nil
     self.nullable = true
   end
 
-  def nullable
+  def nullable?
     if @nullable.is_a?(TrueClass) || @nullable.is_a?(FalseClass)
       return @nullable
     else
@@ -39,20 +39,20 @@ class Jsoning::Mapper
     end
 
     if target_value.nil?
-      target_value = self.get_default_value
-      if target_value.nil? && !self.nullable
+      target_value = self.default_value
+      if target_value.nil? && !self.nullable?
         raise Jsoning::Error, "Null value given for '#{name}' when serializing #{object}"
       end
     end
     target_hash[name] = deep_parse(target_value)
   end
 
-  def get_default_value
-    if self.default_value
-      if self.default_value.is_a?(Proc)
-        return deep_parse(self.default_value.())
+  def default_value
+    if @default_value
+      if @default_value.is_a?(Proc)
+        return deep_parse(@default_value.())
       else
-        return deep_parse(self.default_value)
+        return deep_parse(@default_value)
       end
     else
       nil
@@ -82,7 +82,7 @@ class Jsoning::Mapper
           parsed_data = object
         else
           protocol = Jsoning.protocol_for!(object.class)
-          parsed_data = protocol.parse(object)
+          parsed_data = protocol.retrieve_values_from(object)
         end
       end
 

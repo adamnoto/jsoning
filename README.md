@@ -199,6 +199,52 @@ Jsoning.add_type MyFancyString, processor: { |fancy_string| fancy_string.get_str
 Internally, it is how Jsoning convert date-like data type (`Date`, `DateTime`, `Time`, `ActiveSupport::TimeWithZone`) to
 ISO8601 which can be parsed by compliant JavaScript interpreter in the browser (or somewhere else).
 
+## Parsing JSON back to Hash
+
+Basically, the `JSON` library that is part of Ruby Standard Library already support parsing from JSON string to Hash.
+However, if you feel that you need to assign default value, for example, when value is missing, or when you want to 
+enforce the schema, Ruby's own `JSON` library cannot do that yet. Jsoning, on the other hand, can.
+
+The schema must have been defined by using `Jsoning.for` as have been demonstrated earlier.
+
+Until then, to convert from JSON string to Hash, one can call:
+
+```ruby
+Jsoning.parse(the_json_string, Class)
+```
+
+For example, given:
+
+```ruby
+Jsoning.for(My::User) do
+  key :name, null: false
+  key :years_old, from: :age
+  key :gender, default: "male"
+  key :books, default: proc {
+    default_college_books = []
+    default_college_books << My::Book.new("Mathematics 6A")
+    default_college_books << My::Book.new("Physics A2")
+    default_college_books
+  }
+  key :degree_detail, from: :taken_degree
+end
+
+the_json_string = %Q{
+  {"name":"Adam Baihaqi","years_old":21,"gender":"male","books":[{"name":"Mathematics 6A"},{"name":"Physics A2"}],"degree_detail":null,"registered_at":"2015-11-01T14:41:09+00:00"}
+} 
+```
+
+Calling: `Jsoning.parse(the_json_string, My::User)` will yield a Hash as follow:
+
+```ruby
+{"name"=>"Adam Baihaqi", 
+ "years_old"=>21, 
+ "gender"=>"male", 
+ "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], 
+ "degree_detail"=>nil, 
+ "registered_at"=>"2015-11-01T14:41:09+00:00"}
+```
+
 ## Changelog
 
 == Version 0.1.0
@@ -213,6 +259,11 @@ ISO8601 which can be parsed by compliant JavaScript interpreter in the browser (
 
 1. Allow user to specify how Jsoning would extract value from a custom data type
 2. Date, DateTime, Time, ActiveSupport::TimeWithZone now is by default parsed to ISO8601 format.
+
+== Version 0.4.0
+
+1. When passing a proc as default value, it will be executed to assign default value when value is nil.
+2. Parsing JSON string as hash by using `Jsoning.parse`
 
 ## License
 
