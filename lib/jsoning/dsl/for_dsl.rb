@@ -1,6 +1,6 @@
 class Jsoning::ForDsl
   attr_reader :protocol
-  attr_reader :current_version_object
+  attr_accessor :current_version_object
   @@mutex = Mutex.new
 
   def initialize(protocol)
@@ -10,15 +10,17 @@ class Jsoning::ForDsl
   # specify the version under which key will be executed
   def version(version_name)
     @@mutex.synchronize do
-      fail Jsoning::Error, "Version cannot be nested" if current_version_object
+      # todo: make sure version cannot be nester, in order that to be possible
+      # version must have its own dsl, dduh
+      # fail Jsoning::Error, "Version cannot be nested" if current_version_object
 
       # retrieve the version, or create a new one if not yet defined
       version = protocol.get_version(version_name)
       version = protocol.add_version(version_name) if version.nil?
 
       self.current_version_object = version
+      yield
     end
-    self.current_version_object = nil
   end
 
   # args is first specifying the name for variable to be displayed in JSON docs,
