@@ -1,68 +1,77 @@
 # takes care of the class
 class Jsoning::Protocol
   attr_reader :klass
-  attr_reader :mappers
-  attr_reader :mappers_order
+  attr_reader :version_instances
 
   def initialize(klass)
     @klass = klass
+    @version_instances = {}
 
-    # mappers, only storing symbol of mapped values
-    @mappers_order = []
+    # each protocol has a default version named :default
+    add_version(:default)
 
-    @mappers = {}
+    self
   end
 
-  def add_mapper(mapper)
-    raise Jsoning::Error, "Mapper must be of class Jsoning::Mapper" unless mapper.is_a?(Jsoning::Mapper)
-    @mappers_order << canonical_name(mapper.name)
-    @mappers[canonical_name(mapper.name)] = mapper
-  end
-
-  def mapper_for(name)
-    @mappers[canonical_name(name)]
-  end
-
-  # generate a JSON object
-  # options:
-  # - pretty: pretty print json data
-  def generate(object, options = {})
-    pretty = options[:pretty]
-    pretty = options["pretty"] if pretty.nil?
-    pretty = false if pretty.nil?
-
-    data = retrieve_values_from(object)
-
-    if pretty
-      JSON.pretty_generate(data)
-    else
-      JSON.generate(data)
+  # add a new version, a protocol can handle many version
+  # to export the JSON
+  def add_version(version_name)
+    unless version_name.is_a?(String) || version_name.is_a?(Symbol)
+      fail "Version name must be either a String or a Symbol"
     end
+    version = Jsoning::Version.new(self)
+    version.version_name = version_name
+    @version_instances[version.version_name] = version
+    version
+  end
+
+  # retrieve a defined version, or return nil if undefined
+  def get_version(version_name)
+    @version_instances[version_name.to_s]
+  end
+
+  # retrieve a defined version, or fail if undefined
+  def get_version!(version_name)
+    version = get_version(version_name)
+    fail Jsoning::Error, "Unknown version: #{version_name}" if version.nil?
+    version
   end
 
   # construct the JSON from given object
-  def retrieve_values_from(object)
+  # options:
+  #  - version: the version to be used for processing 
+  def retrieve_values_from(object, options)
+    # user will pass in version, rather than version_name, although actually
+    # it is a version_name instead of version instance
+    version_name = options[:version]
+    # use default if version is undefined
+    version = get_version(version_name) || get_version(:default)
+
     # hold data here
     data = {}
 
-    mappers_order.each do |mapper_sym|
-      mapper = mapper_for(mapper_sym)
-      mapper.extract(object, data)
+    version.mappers_order.each do |mapper_sym|
+      mapper = version.mapper_for(mapper_sym)
+      # version_name and version may be different, that is when the user uses version
+      # that is not yet defined, therefore, will fall to default. therefore, user
+      # version_name as this is what is requested by the caller
+      mapper.extract(object, version_name, data)
     end
 
     data
   end
 
   # construct hash from given JSON
-  def construct_hash_from(json_string)
+  def construct_hash_from(json_string, version_name)
     data = {}
 
     # make all json obj keys to downcase, symbol
     json_obj = JSON.parse(json_string)
     json_obj = Hash[json_obj.map { |k, v| [k.to_s.downcase, v]}]
 
-    mappers_order.each do |mapper_sym|
-      mapper = mapper_for(mapper_sym)
+    version = get_version!(version_name)
+    version.mappers_order.each do |mapper_sym|
+      mapper = version.mapper_for(mapper_sym)
       mapper_key_name = mapper.name.to_s.downcase
       
       mapper_default_value = mapper.default_value
@@ -78,10 +87,5 @@ class Jsoning::Protocol
     end
 
     data
-  end
-
-  private
-  def canonical_name(key_name)
-    key_name.to_s.downcase.to_sym
   end
 end
