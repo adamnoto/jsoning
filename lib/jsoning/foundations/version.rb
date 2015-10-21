@@ -1,3 +1,4 @@
+# jsoning can output to conform to different versioning
 class Jsoning::Version
   attr_reader :version_name
 
@@ -12,6 +13,12 @@ class Jsoning::Version
     # mappers, only storing symbol of mapped values
     @mappers_order = []
     @mappers = {}
+  end
+
+  def version_name=(version_name)
+    # version name is always be a string, because if user's version
+    # name happen to be an integer, we don't want to fail on that case
+    @version_name = version_name.to_s
   end
 
   def add_mapper(mapper)

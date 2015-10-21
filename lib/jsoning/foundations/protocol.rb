@@ -6,6 +6,11 @@ class Jsoning::Protocol
   def initialize(klass)
     @klass = klass
     @version_instances = {}
+
+    # each protocol has a default version named :default
+    default_version = Jsoning::Version.new
+    default_version.version_name = :default
+    add_version(default_version)
   end
 
   # add a new version, a protocol can handle many version
