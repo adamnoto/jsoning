@@ -2,8 +2,9 @@ require "jsoning/version"
 
 require "jsoning/dsl/for_dsl"
 require "jsoning/exceptions/error"
-require "jsoning/foundations/mapper"
 require "jsoning/foundations/protocol"
+require "jsoning/foundations/version"
+require "jsoning/foundations/mapper"
 
 require "json"
 
