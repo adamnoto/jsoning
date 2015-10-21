@@ -89,9 +89,4 @@ class Jsoning::Protocol
 
     data
   end
-
-  private
-  def canonical_name(key_name)
-    key_name.to_s.downcase.to_sym
-  end
 end

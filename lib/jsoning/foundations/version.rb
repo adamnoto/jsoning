@@ -23,11 +23,16 @@ class Jsoning::Version
 
   def add_mapper(mapper)
     raise Jsoning::Error, "Mapper must be of class Jsoning::Mapper" unless mapper.is_a?(Jsoning::Mapper)
-    @mappers_order << canonical_name(mapper.name)
-    @mappers[canonical_name(mapper.name)] = mapper
+    @mappers_order << canonical_mapper_name(mapper.name)
+    @mappers[canonical_mapper_name(mapper.name)] = mapper
   end
 
   def mapper_for(name)
-    @mappers[canonical_name(name)]
+    @mappers[canonical_mapper_name(name)]
   end
+
+  private
+    def canonical_mapper_name(key_name)
+      key_name.to_s.downcase.to_sym
+    end
 end
