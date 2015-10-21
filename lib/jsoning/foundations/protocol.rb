@@ -58,15 +58,16 @@ class Jsoning::Protocol
   end
 
   # construct hash from given JSON
-  def construct_hash_from(json_string)
+  def construct_hash_from(json_string, version_name)
     data = {}
 
     # make all json obj keys to downcase, symbol
     json_obj = JSON.parse(json_string)
     json_obj = Hash[json_obj.map { |k, v| [k.to_s.downcase, v]}]
 
-    mappers_order.each do |mapper_sym|
-      mapper = mapper_for(mapper_sym)
+    version = get_version!(version_name)
+    version.mappers_order.each do |mapper_sym|
+      mapper = version.mapper_for(mapper_sym)
       mapper_key_name = mapper.name.to_s.downcase
       
       mapper_default_value = mapper.default_value

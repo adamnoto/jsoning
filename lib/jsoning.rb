@@ -143,9 +143,9 @@ module Jsoning
   end
 
   # parse the JSON String to Hash
-  def parse(json_string, klass)
+  def parse(json_string, klass, version_name = :default)
     Jsoning.initialize_type_extensions 
     protocol = protocol_for!(klass)
-    protocol.construct_hash_from(json_string)
+    protocol.construct_hash_from(json_string, version_name)
   end
 end
