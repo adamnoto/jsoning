@@ -7,6 +7,8 @@ any Ruby object there is. Kiss good bye to complexity
 [![Code Climate](https://codeclimate.com/github/saveav/jsoning/badges/gpa.svg)](https://codeclimate.com/github/saveav/jsoning)
 [ ![Codeship Status for saveav/bali](https://codeship.com/projects/b58d3950-493b-0133-a217-168d58eb1296/status?branch=release)](https://codeship.com/projects/105558)
 
+Please refer to the test spec for better understanding. Thank you.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -248,6 +250,51 @@ Calling: `Jsoning.parse(the_json_string, My::User)` will yield a Hash as follow:
  "registered_at"=>"2015-11-01T14:41:09+00:00"}
 ```
 
+## Versioning
+
+Since beginning, JSONing is made to easy serializing/deserializing data from API call.
+Often, API call itself can be versioned. Therefore, it would be better if JSONing
+also support versioning, which it does!
+
+By default, though, all schema are under default version. Version will be altered when
+specifically modified by `version` modifier.
+
+Suppose we have our `My::Book` to be versioned:
+
+```ruby
+Jsoning.for(My::Book) do
+  version :v1 do
+    key :name
+  end
+  version :v2 do
+    key :book_name, from: :name
+  end
+end
+```
+
+At this point, ignoring that we have ever defined `My::Book` before, `My::Book` will have
+2 Jsoning versions. If we take into account the fact that we have defined `My::Book` previously,
+then, we will have one additional version: the default version.
+
+Spec below will pass:
+
+```ruby
+book = My::Book.new("Harry Potter")
+expect(Jsoning.generate(book, hash: true, version: :v1)).to eq({"name"=>"Harry Potter"})
+expect(Jsoning.generate(book, hash: true, version: :v2)).to eq({"book_name"=>"Harry Potter"})
+```
+
+We can also generate the whole user json/hash, too:
+
+```ruby
+json = Jsoning.generate(user, version: :v1)
+expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
+json = Jsoning.generate(user, version: :v2)
+expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"book_name"=>"Quiet: The Power of Introvert"}, {"book_name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
+```
+
+If for when generating object, the requested versioning is undefined, the default version will be used.
+
 ## Changelog
 
 == Version 0.1.0
@@ -273,6 +320,10 @@ Calling: `Jsoning.parse(the_json_string, My::User)` will yield a Hash as follow:
 1. Bugfix: when Jsoning to Hash, if encountering data-like datatype, error is 
    raised due to Jsoning does not know how to extract value from them. However, if the object
    is converted to JSON string, everything is working as expected.
+
+== Version 0.6.0
+
+1. Versioning the way JSON/Hash is de-serialized/serialized
 
 ## License
 

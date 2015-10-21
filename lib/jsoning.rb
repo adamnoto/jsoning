@@ -2,8 +2,9 @@ require "jsoning/version"
 
 require "jsoning/dsl/for_dsl"
 require "jsoning/exceptions/error"
-require "jsoning/foundations/mapper"
 require "jsoning/foundations/protocol"
+require "jsoning/foundations/version"
+require "jsoning/foundations/mapper"
 
 require "json"
 
@@ -42,9 +43,43 @@ module Jsoning
   end
 
   # generate the json document
+  # options:
+  # - hash: specify if the return is a hash
+  # - pretty: only for when hash is set to flash, print JSON pretty
+  # - version: specify the version to be used for the processing
   def generate(object, options = {})
+    Jsoning.initialize_type_extensions
     protocol = protocol_for!(object.class)
-    protocol.generate(object, options)
+
+    # use default version if version is unspecified 
+    options[:version] = :default if options[:version].nil?
+
+    if options[:hash] == true
+      return generate_hash(object, protocol, options)
+    else
+      return generate_json(object, protocol, options)
+    end
+  end
+
+  # generate a JSON object
+  # options:
+  # - pretty: pretty print json data
+  def generate_json(object, protocol, options)
+    pretty = options[:pretty]
+    pretty = options["pretty"] if pretty.nil?
+    pretty = false if pretty.nil?
+
+    data = protocol.retrieve_values_from(object, options)
+
+    if pretty
+      JSON.pretty_generate(data)
+    else
+      JSON.generate(data)
+    end
+  end
+
+  def generate_hash(object, protocol, options)
+    as_hash = protocol.retrieve_values_from(object, options)
   end
 
   @@type_extension_initialized = false
@@ -84,12 +119,13 @@ module Jsoning
     end
   end
 
+  # using [] will generate using default schema
   def [](object) 
-    Jsoning.initialize_type_extensions 
-    protocol = protocol_for!(object.class)
-    protocol.retrieve_values_from(object)
+    generate(object, hash: true, version: :default)
   end
 
+  # add custom type explaining to Jsoning how Jsoning should extract value from
+  # this kind of class
   def add_type(klass, options = {})
     processor = options[:processor]
     raise Jsoning::Error, "Pass in processor that is a proc explaining how to extract the value" unless processor.is_a?(Proc)
@@ -102,15 +138,14 @@ module Jsoning
     private
 
     def Jsoning(object, options = {})
-      Jsoning.initialize_type_extensions 
       Jsoning.generate(object, options)
     end
   end
 
   # parse the JSON String to Hash
-  def parse(json_string, klass)
+  def parse(json_string, klass, version_name = :default)
     Jsoning.initialize_type_extensions 
     protocol = protocol_for!(klass)
-    protocol.construct_hash_from(json_string)
+    protocol.construct_hash_from(json_string, version_name)
   end
 end
