@@ -1,9 +1,31 @@
 # takes care of the class
 class Jsoning::Protocol
   attr_reader :klass
+  attr_reader :version_instances
 
   def initialize(klass)
     @klass = klass
+    @version_instances = {}
+  end
+
+  # add a new version, a protocol can handle many version
+  # to export the JSON
+  def add_version(version_name)
+    version = Jsoning::Version.new
+    version.version_name = version_name
+    @version_instances[version_name] = version
+  end
+
+  # retrieve a defined version, or return nil if undefined
+  def get_version(version_name)
+    @version_instances[version_name]
+  end
+
+  # retrieve a defined version, or fail if undefined
+  def get_version!(version_name)
+    version = get_version(version_name)
+    fail Jsoning::Error, "Unknown version: #{version_name}" if version.nil?
+    version
   end
 
   # generate a JSON object
