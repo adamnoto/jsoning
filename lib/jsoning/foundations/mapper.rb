@@ -1,5 +1,8 @@
 # responsible of mapping from object to representable values, one field at a time
 class Jsoning::Mapper
+  # access to a version instance
+  attr_accessor :version
+
   # when mapped, what will be the mapped name
   attr_writer :name
 
@@ -9,10 +12,11 @@ class Jsoning::Mapper
   attr_accessor :parallel_variable
   attr_accessor :custom_block
 
-  def initialize
+  def initialize(version_instance)
     self.parallel_variable = nil
     @default_value = nil
     self.nullable = true
+    self.version = version_instance
   end
 
   def nullable?
@@ -82,7 +86,7 @@ class Jsoning::Mapper
           parsed_data = object
         else
           protocol = Jsoning.protocol_for!(object.class)
-          parsed_data = protocol.retrieve_values_from(object)
+          parsed_data = protocol.retrieve_values_from(object, {version: version.version_name})
         end
       end
 

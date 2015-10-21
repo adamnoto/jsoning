@@ -37,30 +37,20 @@ class Jsoning::Protocol
     version
   end
 
-  # generate a JSON object
-  # options:
-  # - pretty: pretty print json data
-  def generate(object, options = {})
-    pretty = options[:pretty]
-    pretty = options["pretty"] if pretty.nil?
-    pretty = false if pretty.nil?
-
-    data = retrieve_values_from(object)
-
-    if pretty
-      JSON.pretty_generate(data)
-    else
-      JSON.generate(data)
-    end
-  end
-
   # construct the JSON from given object
-  def retrieve_values_from(object)
+  # options:
+  #  - version: the version to be used for processing 
+  def retrieve_values_from(object, options)
+    # user will pass in version, rather than version_name, although actually
+    # it is a version_name instead of version instance
+    version_name = options[:version]
+    version = get_version!(version_name)
+
     # hold data here
     data = {}
 
-    mappers_order.each do |mapper_sym|
-      mapper = mapper_for(mapper_sym)
+    version.mappers_order.each do |mapper_sym|
+      mapper = version.mapper_for(mapper_sym)
       mapper.extract(object, data)
     end
 

@@ -39,7 +39,14 @@ class Jsoning::ForDsl
       end
     end
 
-    mapper = Jsoning::Mapper.new
+    # get the version instance
+    version_instance = if self.current_version_object.nil?
+      protocol.get_version!(:default)
+    else
+      current_version_object
+    end 
+
+    mapper = Jsoning::Mapper.new(version_instance)
     if block_given?
       raise Jsoning::Error, "Cannot parse block to key"
     else
@@ -54,12 +61,7 @@ class Jsoning::ForDsl
 
     options.keys { |key| raise Jsoning::Error, "Undefined option: #{key}" }
 
-    # add mapper to default version if not specifically defined
-    if self.current_version_object.nil?
-      protocol.get_version!(:default).add_mapper(mapper)
-    else
-      # or otherwise, add to the current version
-      current_version_object.add_mapper(mapper)
-    end
+    # add mapper to the version
+    version_instance.add_mapper(mapper)
   end
 end
