@@ -34,29 +34,29 @@ class Jsoning::Mapper
   end
 
   # map this very specific object's field to target_hash
-  def extract(object, target_hash)
+  def extract(object, requested_version_name, target_hash)
     target_value = nil
 
     if object.respond_to?(parallel_variable)
       parallel_val = object.send(parallel_variable)
-      target_value = deep_parse(parallel_val)
+      target_value = deep_parse(parallel_val, requested_version_name)
     end
 
     if target_value.nil?
-      target_value = self.default_value
+      target_value = self.default_value(requested_version_name)
       if target_value.nil? && !self.nullable?
         raise Jsoning::Error, "Null value given for '#{name}' when serializing #{object}"
       end
     end
-    target_hash[name] = deep_parse(target_value)
+    target_hash[name] = deep_parse(target_value, requested_version_name)
   end
 
-  def default_value
+  def default_value(version_name = self.version.version_name)
     if @default_value
       if @default_value.is_a?(Proc)
-        return deep_parse(@default_value.())
+        return deep_parse(@default_value.(), version_name)
       else
-        return deep_parse(@default_value)
+        return deep_parse(@default_value, version_name)
       end
     else
       nil
@@ -64,7 +64,7 @@ class Jsoning::Mapper
   end
 
   private
-    def deep_parse(object)
+    def deep_parse(object, version_name)
       parsed_data = nil
 
       value_extractor = Jsoning::TYPE_EXTENSIONS[object.class.to_s]
@@ -74,19 +74,19 @@ class Jsoning::Mapper
         if object.is_a?(Array)
           parsed_data = []
           object.each do |each_obj|
-            parsed_data << deep_parse(each_obj)
+            parsed_data << deep_parse(each_obj, version_name)
           end
         elsif object.is_a?(Hash)
           parsed_data = {}
           object.each do |obj_key_name, obj_val|
-            parsed_data[obj_key_name] = deep_parse(obj_val)
+            parsed_data[obj_key_name] = deep_parse(obj_val, version_name)
           end
         elsif object.is_a?(Integer) || object.is_a?(Float) || object.is_a?(String) ||
           object.is_a?(TrueClass) || object.is_a?(FalseClass) || object.is_a?(NilClass)
           parsed_data = object
         else
           protocol = Jsoning.protocol_for!(object.class)
-          parsed_data = protocol.retrieve_values_from(object, {version: version.version_name})
+          parsed_data = protocol.retrieve_values_from(object, {version: version_name})
         end
       end
 
