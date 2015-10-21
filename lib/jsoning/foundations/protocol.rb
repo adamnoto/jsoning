@@ -44,14 +44,18 @@ class Jsoning::Protocol
     # user will pass in version, rather than version_name, although actually
     # it is a version_name instead of version instance
     version_name = options[:version]
-    version = get_version!(version_name)
+    # use default if version is undefined
+    version = get_version(version_name) || get_version(:default)
 
     # hold data here
     data = {}
 
     version.mappers_order.each do |mapper_sym|
       mapper = version.mapper_for(mapper_sym)
-      mapper.extract(object, data)
+      # version_name and version may be different, that is when the user uses version
+      # that is not yet defined, therefore, will fall to default. therefore, user
+      # version_name as this is what is requested by the caller
+      mapper.extract(object, version_name, data)
     end
 
     data
