@@ -8,22 +8,26 @@ class Jsoning::Protocol
     @version_instances = {}
 
     # each protocol has a default version named :default
-    default_version = Jsoning::Version.new
-    default_version.version_name = :default
-    add_version(default_version)
+    add_version(:default)
+
+    self
   end
 
   # add a new version, a protocol can handle many version
   # to export the JSON
   def add_version(version_name)
-    version = Jsoning::Version.new
+    unless version_name.is_a?(String) || version_name.is_a?(Symbol)
+      fail "Version name must be either a String or a Symbol"
+    end
+    version = Jsoning::Version.new(self)
     version.version_name = version_name
-    @version_instances[version_name] = version
+    @version_instances[version.version_name] = version
+    version
   end
 
   # retrieve a defined version, or return nil if undefined
   def get_version(version_name)
-    @version_instances[version_name]
+    @version_instances[version_name.to_s]
   end
 
   # retrieve a defined version, or fail if undefined
