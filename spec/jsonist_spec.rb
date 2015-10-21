@@ -48,9 +48,10 @@ describe Jsoning do
       end
 
       protocol = Jsoning.protocol_for(My::User)
-      expect(protocol.mapper_for(:name)).to_not be_nil
+      default_version = protocol.get_version(:default)
 
-      name_mapper = protocol.mapper_for(:name)
+      expect(default_version.mapper_for(:name)).to_not be_nil
+      name_mapper = default_version.mapper_for(:name)
       expect(name_mapper.name).to eq("name")
       expect(name_mapper.parallel_variable).to eq(:name)
     end
@@ -61,7 +62,9 @@ describe Jsoning do
       end
 
       protocol = Jsoning.protocol_for(My::User)
-      name_mapper = protocol.mapper_for(:name)
+      default_version = protocol.get_version(:default)
+
+      name_mapper = default_version.mapper_for(:name)
       expect(name_mapper.name).to eq("name")
       expect(name_mapper.default_value).to eq("Adam Pahlevi")
     end
@@ -72,7 +75,8 @@ describe Jsoning do
       end
 
       protocol = Jsoning.protocol_for(My::User)
-      name_mapper = protocol.mapper_for(:name)
+      default_version = protocol.get_version(:default)
+      name_mapper = default_version.mapper_for(:name)
       expect(name_mapper.name).to eq("name")
       expect(name_mapper.nullable?).to eq(false)
     end
