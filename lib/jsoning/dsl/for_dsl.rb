@@ -1,8 +1,24 @@
 class Jsoning::ForDsl
   attr_reader :protocol
+  attr_reader :current_version_object
+  @@mutex = Mutex.new
 
   def initialize(protocol)
     @protocol = protocol
+  end
+
+  # specify the version under which key will be executed
+  def version(version_name)
+    @@mutex.synchronize do
+      fail Jsoning::Error, "Version cannot be nested" if current_version_object
+
+      # retrieve the version, or create a new one if not yet defined
+      version = protocol.get_version(version_name)
+      version = protocol.add_version(version_name) if version.nil?
+
+      self.current_version_object = version
+    end
+    self.current_version_object = nil
   end
 
   # args is first specifying the name for variable to be displayed in JSON docs,
@@ -38,6 +54,12 @@ class Jsoning::ForDsl
 
     options.keys { |key| raise Jsoning::Error, "Undefined option: #{key}" }
 
-    protocol.add_mapper mapper
+    # add mapper to default version if not specifically defined
+    if self.current_version_object.nil?
+      protocol.get_version!(:default).add_mapper(mapper)
+    else
+      # or otherwise, add to the current version
+      current_version_object.add_mapper(mapper)
+    end
   end
 end
