@@ -138,6 +138,12 @@ describe Jsoning do
         expect(Jsoning.generate(book, hash: true, version: :v2)).to eq({"book_name"=>"Harry Potter"})
       end
 
+      it "can parse versionised hash result" do
+        book = My::Book.new("Harry Potter")
+        expect(Jsoning.parse("{\"name\":\"Harry Potter\"}", My::Book, :v1)).to eq(Jsoning.generate(book, hash: true, version: :v1))
+        expect(Jsoning.parse("{\"book_name\":\"Harry Potter\"}", My::Book, :v2)).to eq((Jsoning.generate(book, hash: true, version: :v2)))
+      end
+
       it "can versionise json result" do
         book = My::Book.new("Harry Potter")
         expect(Jsoning.generate(book, version: :v1)).to eq("{\"name\":\"Harry Potter\"}")
