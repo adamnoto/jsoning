@@ -292,13 +292,21 @@ expect(Jsoning.generate(book, hash: true, version: :v1)).to eq({"name"=>"Harry P
 expect(Jsoning.generate(book, hash: true, version: :v2)).to eq({"book_name"=>"Harry Potter"})
 ```
 
-We can also generate the whole user json/hash, too:
+Notice that we can use `inherits` to save ourself from writing keys that have been defined somewhere when
+we do versioning:
 
 ```ruby
-json = Jsoning.generate(user, version: :v1)
-expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "upcase_name"=>"ADAM BAIHAQI", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
-json = Jsoning.generate(user, version: :v2)
-expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "upcase_name"=>"ADAM BAIHAQI", "years_old"=>21, "gender"=>"male", "books"=>[{"book_name"=>"Quiet: The Power of Introvert"}, {"book_name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
+Jsoning.for(My::User) do
+  version :v2 do
+    inherits :name, :age, :gender, :taken_degree, :books
+    key :upcase_name, from: :name, value: proc { |name| name.upcase }
+  end
+
+  version :v3 do
+    inherits :name, :age, :gender, :taken_degree, :books
+    inherits :upcase_name, from: :v2
+  end
+end
 ```
 
 If for when generating object, the requested versioning is undefined, the default version will be used.
@@ -336,6 +344,10 @@ If for when generating object, the requested versioning is undefined, the defaul
 == Version 0.7.0
 
 1. Add value post-processor
+
+== Version 0.8.0
+
+1. Add `inherits` allowing versioned result to inherits key from default namespace
 
 ## License
 
