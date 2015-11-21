@@ -91,7 +91,7 @@ module Jsoning
 
     begin
       ::Time
-      self.add_type Time, processor: proc { |time| time.strftime("%FT%T%z") }
+      self.add_type ::Time, processor: proc { |time| time.strftime("%FT%T%z") }
     rescue
     end
 
@@ -106,14 +106,14 @@ module Jsoning
 
     begin
       ::DateTime
-      self.add_type DateTime, processor: proc { |date| date.strftime("%FT%T%z") }
+      self.add_type ::DateTime, processor: proc { |date| date.strftime("%FT%T%z") }
     rescue => e 
       # nothing, don't add
     end
 
     begin
       ::Date
-      self.add_type Date, processor: proc { |date| date.strftime("%FT%T%z") }
+      self.add_type ::Date, processor: proc { |date| date.strftime("%FT%T%z") }
     rescue 
       # nothing, don't add
     end
