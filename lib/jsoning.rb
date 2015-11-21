@@ -16,7 +16,7 @@ module Jsoning
   module_function
 
   # returns a protocol, or create one if none exists
-  def protocol_for(klass)
+  def protocol_for_or_create(klass)
     protocol = PROTOCOLS[klass.to_s]
     if protocol.nil?
       protocol = Jsoning::Protocol.new(klass)
@@ -39,7 +39,7 @@ module Jsoning
 
   # define the protocol
   def for(klass, &block)
-    Jsoning::ForDsl.new(protocol_for(klass)).instance_eval(&block)
+    Jsoning::ForDsl.new(protocol_for_or_create(klass)).instance_eval(&block)
   end
 
   # generate the json document
