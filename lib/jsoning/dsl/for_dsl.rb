@@ -7,6 +7,35 @@ class Jsoning::ForDsl
     @protocol = protocol
   end
 
+  # inherits can happen inside version block
+  # it allows version to inherit specific key from parents
+  def inherits(*args)
+    fail 'Must be inside version block' unless current_version_object
+    all_keys = []
+    options = {}
+
+    args.each do |arg|
+      if arg.is_a?(String) || arg.is_a?(Symbol)
+        all_keys << arg
+      elsif arg.is_a?(Hash)
+        options = arg
+      end
+    end
+
+    current_version = self.current_version_object
+    if options[:from] || options['from']
+      parent_version = current_version.protocol.get_version(options[:from] || options['from'])
+    else
+      parent_version = current_version.protocol.get_version(:default)
+    end
+
+    all_keys.each do |key_name|
+      mapper = parent_version.mapper_for(key_name)
+      current_version.add_mapper(mapper)
+    end
+    all_keys
+  end
+
   # specify the version under which key will be executed
   def version(version_name)
     @@mutex.synchronize do
@@ -20,6 +49,7 @@ class Jsoning::ForDsl
 
       self.current_version_object = version
       yield
+      self.current_version_object = nil
     end
   end
 

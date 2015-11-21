@@ -39,7 +39,7 @@ class Jsoning::Mapper
 
     if object.respond_to?(parallel_variable)
       parallel_val = object.send(parallel_variable)
-      target_value = deep_parse(parallel_val, requested_version_name)
+      target_value = parallel_val
     end
 
     if target_value.nil?
@@ -49,22 +49,23 @@ class Jsoning::Mapper
       end
     end
 
-    extracted_value = deep_parse(target_value, requested_version_name)
-
     # apply extractor to extracted value, if processor is defined
     if value_processor
-      extracted_value = value_processor.(extracted_value)
+      target_value = deep_parse(target_value, requested_version_name, false)
+      target_value = value_processor.(target_value)
+    else
+      target_value = deep_parse(target_value, requested_version_name, true)
     end
 
-    target_hash[name] = extracted_value
+    target_hash[name] = target_value
   end
 
   def default_value(version_name = self.version.version_name)
     if @default_value
       if @default_value.is_a?(Proc)
-        return deep_parse(@default_value.(), version_name)
+        return deep_parse(@default_value.(), version_name, true)
       else
-        return deep_parse(@default_value, version_name)
+        return deep_parse(@default_value, version_name, true)
       end
     else
       nil
@@ -72,29 +73,40 @@ class Jsoning::Mapper
   end
 
   private
-    def deep_parse(object, version_name)
+    def deep_parse(object, version_name, run_value_extractor)
       parsed_data = nil
 
       value_extractor = Jsoning::TYPE_EXTENSIONS[object.class.to_s]
-      if value_extractor # is defined
+      if value_extractor && run_value_extractor # is defined
         parsed_data = value_extractor.(object)
       else
         if object.is_a?(Array)
           parsed_data = []
           object.each do |each_obj|
-            parsed_data << deep_parse(each_obj, version_name)
+            parsed_data << deep_parse(each_obj, version_name, run_value_extractor)
           end
         elsif object.is_a?(Hash)
           parsed_data = {}
           object.each do |obj_key_name, obj_val|
-            parsed_data[obj_key_name] = deep_parse(obj_val, version_name)
+            parsed_data[obj_key_name] = deep_parse(obj_val, version_name, run_value_extractor)
           end
         elsif object.is_a?(Integer) || object.is_a?(Float) || object.is_a?(String) ||
           object.is_a?(TrueClass) || object.is_a?(FalseClass) || object.is_a?(NilClass)
           parsed_data = object
         else
-          protocol = Jsoning.protocol_for!(object.class)
-          parsed_data = protocol.retrieve_values_from(object, {version: version_name})
+          if run_value_extractor
+            protocol = Jsoning.protocol_for!(object.class)
+            parsed_data = protocol.retrieve_values_from(object, {version: version_name})
+          else
+            # if value extractor is false, don't raise error if protocol is undefined.
+            # value processor is exactly way for user to customly extract data in-line
+            protocol = Jsoning::PROTOCOLS[object.class]
+            if protocol
+              parsed_data = protocol.retrieve_values_from(object, {version: version_name})
+            else
+              parsed_data = object
+            end
+          end
         end
       end
 
