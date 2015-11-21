@@ -10,6 +10,7 @@ class Jsoning::Mapper
   attr_writer :nullable
   # what variable in the object will be used to obtain the value
   attr_accessor :parallel_variable
+  attr_accessor :value_processor
 
   def initialize(version_instance)
     self.parallel_variable = nil
@@ -47,7 +48,15 @@ class Jsoning::Mapper
         raise Jsoning::Error, "Null value given for '#{name}' when serializing #{object}"
       end
     end
-    target_hash[name] = deep_parse(target_value, requested_version_name)
+
+    extracted_value = deep_parse(target_value, requested_version_name)
+
+    # apply extractor to extracted value, if processor is defined
+    if value_processor
+      extracted_value = value_processor.(extracted_value)
+    end
+
+    target_hash[name] = extracted_value
   end
 
   def default_value(version_name = self.version.version_name)
