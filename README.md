@@ -29,6 +29,7 @@ Or install it yourself as:
 
 1. Generating JSON from your object
 2. Generating Hash from your object
+3. Versioning the JSON/Hash result
 
 ## Assumptions
 
@@ -68,6 +69,8 @@ Say, we want to serialize User. First, we have to define the serializer for `My:
 ```ruby
 Jsoning.for(My::User) do
   key :name
+  # demonstrating value post-processor
+  key :upcase_name, from: :name, value: { |name| name.upcase }
   key :years_old, from: :age
   key :gender, default: "male"
   key :books
@@ -112,7 +115,7 @@ Jsoning(user)
 Which will return:
 
 ```json
-{"name":"Adam Baihaqi","years_old":21,"gender":"male","books":[{"name":"Quiet: The Power of Introvert"},{"name":"Harry Potter and the Half-Blood Prince"}],"degree_detail":null}
+{"name":"Adam Baihaqi","upcase_name":"ADAM BAIHAQI","years_old":21,"gender":"male","books":[{"name":"Quiet: The Power of Introvert"},{"name":"Harry Potter and the Half-Blood Prince"}],"degree_detail":null}
 ```
 
 We can also pretty-print the value, which usually is bit slower though, by calling:
@@ -126,6 +129,7 @@ Which will return:
 ```json
 {
   "name": "Adam Baihaqi",
+  "upcase_name": "ADAM BAIHAQI",
   "years_old": 21,
   "gender": "male",
   "books": [
@@ -154,6 +158,7 @@ Jsoning the user with pretty set to true, will return:
 ```json
 {
   "name": "Adam Baihaqi",
+  "upcase_name": "ADAM BAIHAQI",
   "years_old": 21,
   "gender": "male",
   "books": [
@@ -181,6 +186,7 @@ The syntax above will return ruby hash object:
 
 ```ruby
 {"name"=>"Adam Baihaqi", 
+ "upcase_name"=>"ADAM BAIHAQI",
  "years_old"=>21, 
  "gender"=>"male", 
  "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], 
@@ -231,6 +237,7 @@ end
 
 the_json_string = %Q{
   {"name":"Adam Baihaqi",
+   "upcase_name"=>"ADAM BAIHAQI",
    "years_old":21,
    "gender":"male",
    "books":[{"name":"Mathematics 6A"},{"name":"Physics A2"}],
@@ -243,6 +250,7 @@ Calling: `Jsoning.parse(the_json_string, My::User)` will yield a Hash as follow:
 
 ```ruby
 {"name"=>"Adam Baihaqi", 
+ "upcase_name"=>"ADAM BAIHAQI",
  "years_old"=>21, 
  "gender"=>"male", 
  "books"=>[{"name"=>"Mathematics 6A"}, {"name"=>"Physics A2"}], 
@@ -288,9 +296,9 @@ We can also generate the whole user json/hash, too:
 
 ```ruby
 json = Jsoning.generate(user, version: :v1)
-expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
+expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "upcase_name"=>"ADAM BAIHAQI", "years_old"=>21, "gender"=>"male", "books"=>[{"name"=>"Quiet: The Power of Introvert"}, {"name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
 json = Jsoning.generate(user, version: :v2)
-expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "years_old"=>21, "gender"=>"male", "books"=>[{"book_name"=>"Quiet: The Power of Introvert"}, {"book_name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
+expect(JSON.parse(json)).to eq({"name"=>"Adam Baihaqi", "upcase_name"=>"ADAM BAIHAQI", "years_old"=>21, "gender"=>"male", "books"=>[{"book_name"=>"Quiet: The Power of Introvert"}, {"book_name"=>"Harry Potter and the Half-Blood Prince"}], "degree_detail"=>nil, "registered_at"=>"2015-11-01T14:41:09+0000"})
 ```
 
 If for when generating object, the requested versioning is undefined, the default version will be used.
@@ -324,6 +332,10 @@ If for when generating object, the requested versioning is undefined, the defaul
 == Version 0.6.0
 
 1. Versioning the way JSON/Hash is de-serialized/serialized
+
+== Version 0.7.0
+
+1. Add value post-processor
 
 ## License
 
