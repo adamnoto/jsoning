@@ -10,7 +10,6 @@ class Jsoning::Mapper
   attr_writer :nullable
   # what variable in the object will be used to obtain the value
   attr_accessor :parallel_variable
-  attr_accessor :custom_block
 
   def initialize(version_instance)
     self.parallel_variable = nil
