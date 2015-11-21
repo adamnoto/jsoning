@@ -33,10 +33,13 @@ class Jsoning::ForDsl
     mapped_from = nil
     options = {}
 
+    # iterate the args given, it contains a string/symbol indicating the key name
+    # and options, that specify further about the behaviour/mechanism of the key
     args.each do |arg|
       if arg.is_a?(String) || arg.is_a?(Symbol)
         mapped_to = arg
       elsif arg.is_a?(Hash)
+        # extract the options if given
         options = arg
       end
     end
@@ -62,6 +65,12 @@ class Jsoning::ForDsl
     mapper.nullable = options.delete("null") if mapper.nullable?.nil?
 
     options.keys { |key| raise Jsoning::Error, "Undefined option: #{key}" }
+    # if value is given, it has a value processor to be executed
+    # after value is determined
+    if options[:value] || options['value']
+      mapper.value_processor = options.delete(:value) || options.delete('value')
+    end
+
 
     # add mapper to the version
     version_instance.add_mapper(mapper)
