@@ -80,6 +80,14 @@ describe Jsoning do
       expect(name_mapper.name).to eq("name")
       expect(name_mapper.nullable?).to eq(false)
     end
+
+    it 'raises an error on unknown option' do
+      expect do
+        Jsoning.for(My::User) do
+          key :name, this_fake_option: true
+        end
+      end.to raise_error(Jsoning::Error)
+    end
   end # dsl
 
   describe "Generator" do
