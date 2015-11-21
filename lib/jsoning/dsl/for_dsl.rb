@@ -64,13 +64,13 @@ class Jsoning::ForDsl
     mapper.nullable = options.delete(:null)
     mapper.nullable = options.delete("null") if mapper.nullable?.nil?
 
-    options.keys { |key| raise Jsoning::Error, "Undefined option: #{key}" }
     # if value is given, it has a value processor to be executed
     # after value is determined
     if options[:value] || options['value']
       mapper.value_processor = options.delete(:value) || options.delete('value')
     end
 
+    options.keys.each { |key| raise Jsoning::Error, "Undefined option: #{key}" }
 
     # add mapper to the version
     version_instance.add_mapper(mapper)
